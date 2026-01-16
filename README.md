@@ -12,6 +12,11 @@ A data analysis framework for evaluating Liquidity Bootstrapping Pool (LBP) perf
 | end_weight_proj             | Raw    | Target project token weight (e.g., `0.50`). |
 | weight_slope                | Calc   | `(start_weight - end_weight) / duration_h`. Measures the weight decay "speed". |
 | initial_fdv_usd             | Calc   | `Starting_Price * Total_Supply`. Starting Fully Diluted Valuation. |
+| swap_fee_pct                | Raw    | The fee charged on trades (e.g., 0.02 for 2%). Controls bot friction. |
+| initial_liquidity_usd       | Calc   | Collateral_Balance_Start × Collateral_Price. The “hard money” backing the pool. |
+| collateral_is_stable        | Calc   | 1 if collateral is USDC/DAI/USDT, 0 if volatile (e.g., WETH). |
+| is_weekend                  | Calc   | 1 if launch_date is Saturday or Sunday. Python: `dt.dayofweek >= 5`. |
+| hour_of_day                 | Calc   | The hour (0–23) of the launch. Python: `dt.hour`. |
 | total_swaps                 | Raw    | `count(*)` from `balancer_v2_ethereum.evt_Swap` for this pool. |
 | unique_users                | Raw    | `count(distinct sender)`. |
 | activity_entropy            | Calc   | Shannon entropy of trades over time. High = steady activity; low = single burst. |
