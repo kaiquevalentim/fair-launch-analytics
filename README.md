@@ -28,16 +28,20 @@ A data analysis framework for evaluating Liquidity Bootstrapping Pool (LBP) perf
 
 *Description: The "Performance" of the pool. Calculated from trading history (Dune `dex.trades`).*
 
-| Column Name | Source | Calculation / Logic |
-| --- | --- | --- |
-| `pool_address` | Raw | Foreign Key. |
-| `volume_usd` | Calc | Total USD value of all swaps during the LBP. |
-| `unique_buyers` | Calc | Count of unique wallet addresses that executed a BUY. |
-| `price_retention` | Calc | `(Avg Price Last 5 Trades) / (Avg Price First 5 Trades)`. |
-| `volatility_score` | Calc | `StdDev(Price) / Mean(Price)`. (0.0 if single trade). |
-| `bot_tx_ratio` | Calc | `%` of total trades that occurred in the first 3 blocks. |
-| `dump_pressure` | Calc | `Sell Volume USD / Buy Volume USD`. |
-| `final_success_score` | Calc | **Target Variable.** Weighted sum of Retention (40%), Volatility, Unique Buyers, and Dump Pressure. |
+| Column Name                 | Source | Calculation / Logic                                                                    |
+| --------------------------- | ------ | -------------------------------------------------------------------------------------- |
+| `pool_address`              | Raw    | Foreign Key (Links to Table A).                                                        |
+| `volume_usd`                | Calc   | Total USD value of all swaps during the LBP.                                           |
+| `unique_buyers`             | Calc   | Count of unique wallet addresses that executed a BUY.                                  |
+| `price_retention`           | Calc   | `(Avg Price Last 5 Blocks) / (Avg Price First 5 Blocks)`. (Measures if price held up). |
+| `volatility_score`          | Calc   | `Mean Price / Standard Deviation of Price`. (Measures turbulence).                     |
+| `dump_pressure`             | Calc   | `Total Buy Volume (USD) / Total Sell Volume (USD)`. (>1.0 means net selling).          |
+| `volume_time_skew`          | New    | Time-weighted center of volume (0.0 = Start, 1.0 = End). Ideal is ~0.5.                |
+| `whale_dominance_pct`       | New    | `Volume of Top 1% Trades / Total Volume`. (Measures centralization risk).              |
+| `turnover_ratio`            | New    | `Total Volume / Initial Liquidity`. (Measures capital efficiency).                     |
+| `bot_tx_ratio`              | New    | `Trades in First 5 Blocks / Total Trades`. (Measures sniper activity).                 |
+| `bot_extraction_usd`        | New    | `Bot Sells - Bot Buys` (during first 5 blocks). Negative means bots are holding.       |
+| `price_discovery_stability` | New    | Volatility calculated only on the last 10% of trades. (Did price settle?).             |
 
 ### **Dataset Statistics**
 
