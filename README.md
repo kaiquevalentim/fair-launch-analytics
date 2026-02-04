@@ -1,7 +1,56 @@
 # fair-launch-analytics
-A data analysis framework for evaluating Liquidity Bootstrapping Pool (LBP) performance, price discovery efficiency, and optimal token launch configurations using on-chain data.
 
-## Final table schema:
+A comprehensive data analysis framework for evaluating Liquidity Bootstrapping Pool (LBP) performance, price discovery efficiency, and optimal token launch configurations using on-chain data from Dune Analytics.
+
+## Project Overview
+
+This framework provides end-to-end analysis of LBP mechanics across Balancer V1 and V2 protocols, extracting key configuration and performance metrics to understand what makes successful token launches.
+
+### Key Objectives
+- **Configuration Analysis**: Extract launch parameters (weights, fees, duration, collateral type)
+- **Performance Evaluation**: Calculate success metrics (volume, price discovery, buyer diversity)
+- **Pattern Recognition**: Identify optimal launch configurations using machine learning
+- **Historical Trends**: Analyze reverse LBPs (rLBPs) and historical performance patterns
+
+---
+
+## Project Structure
+
+### **Data Sources & Downloads**
+- `analytics/dune_api_downloads/` - Direct Dune API data extraction
+  - `v1v2_download.ipynb` - Download Balancer V1/V2 pool data via API
+  - `v1v2_eda_and_data_cleaning.ipynb` - Exploratory analysis and initial cleaning
+  
+- `analytics/dune_web_downloads/` - Web-based data processing and consolidation
+  - `v1_csvs_formatting_and_merging.ipynb` - Format and merge Balancer V1 datasets
+  - `v2_csvs_formatting_and_merging.ipynb` - Format and merge Balancer V2 datasets
+  - `v1v2_eda_and_data_cleaning.ipynb` - Combined analysis and data validation
+  - `LBPs_dataset_analysis.ipynb` - Comprehensive LBP dataset overview
+
+### **Reverse LBPs (rLBPs) Analysis**
+- `analytics/dune_web_downloads/rLBPs/`
+  - `v1v2_download.ipynb` - Download and process reverse LBP data from Balancer V1 & V2
+  - `v1v2_historical_analysis.ipynb` - Historical trends and patterns in reverse launches
+
+### **Machine Learning**
+- `model_development/logistic_regression_&_random_forest.ipynb` - Classification models for predicting LBP success factors
+
+---
+
+## Analytics Workflow
+
+1. **Data Extraction** → Download raw pool data and trade history from Dune
+2. **Data Cleaning** → Deduplicate, normalize, handle missing values
+3. **Feature Engineering** → Calculate configuration metrics (weights, slopes, fees)
+4. **Performance Calculation** → Compute success metrics from trade data
+5. **Exploratory Analysis** → Identify patterns and outliers
+6. **Model Development** → Train predictive models on merged feature-target dataset
+
+---
+
+## Output Datasets
+
+### **Final table schema:
 
 ### **Table A: Configuration Features (`table_a_final_enriched.csv`)**
 
@@ -45,17 +94,87 @@ A data analysis framework for evaluating Liquidity Bootstrapping Pool (LBP) perf
 
 ### **Dataset Statistics**
 
-* **Raw Input (`table_a_complete.csv`):** 2,456 rows.
-* *Contains every configuration update, pause, and test event.*
+| Dataset | File | Rows | Description |
+| --- | --- | --- | --- |
+| **Raw Input** | `table_a_complete.csv` | 2,456 | Every configuration update, pause, and test event. |
+| **Configuration** | `table_a_final_enriched.csv` | 961 | Valid, unique LBP launches (Duration > 6h, deduplicated). |
+| **Performance** | `table_b_advanced.csv` | 961 | Financial performance metrics matched to pools. |
+| **Training** | `training_dataset.csv` | 961 | Merged features + targets ready for ML models. |
 
+---
 
-* **Final Output (`table_a_final_enriched.csv`):** 961 rows.
-* *Contains only valid, unique LBP launches (Duration > 6h, deduplicated).*
+## Key Features Analyzed
 
+### Configuration Metrics
+- Pool weight curves (start/end weights, slope steepness)
+- Swap fees and collateral type (stable vs volatile)
+- Launch timing and duration
+- Temporal factors (weekends, holidays)
 
-* **Target Labels (`table_b_advanced.csv`):** 961 rows.
-* *Financial performance metrics for the exact same pools.*
+### Performance Indicators
+- Trading volume and unique buyer count
+- Price discovery efficiency (retention, volatility)
+- Market participation patterns (bot activity, whale dominance)
+- Capital efficiency (turnover ratio)
 
+---
 
-* **Training Set (`training_dataset.csv`):** 961 rows.
-* *Merged dataset (Features + Targets) ready for ML.*
+## Models & Analysis
+
+### Machine Learning Approach
+The project includes **Logistic Regression** and **Random Forest** classifiers to predict LBP success factors and identify configuration patterns that drive favorable outcomes.
+
+### Data Processing Highlights
+- **Deduplication Logic**: Identifies main LBP event by largest weight change delta
+- **Decimal Conversion**: Handles token-specific decimal normalization (USDC, USDT, DAI, etc.)
+- **Time-Series Analysis**: Computes rolling volatility and time-weighted metrics
+- **Bot Detection**: Identifies sniper trades and extraction strategies in early blocks
+
+---
+
+## Getting Started
+
+### Prerequisites
+- Python 3.8+
+- pandas, numpy, scikit-learn
+- Dune API client library
+- Jupyter Notebook
+
+### Running the Analysis
+1. Execute Dune API downloads to fetch raw pool data
+2. Run data cleaning and formatting notebooks in sequence
+3. Perform EDA to validate data quality
+4. Train models on the final merged dataset
+
+---
+
+## File Structure
+
+```
+fair-launch-analytics/
+├── README.md                                    # Project overview (this file)
+├── analytics/
+│   ├── dune_api_downloads/                     # Direct API extraction
+│   │   ├── v1v2_download.ipynb
+│   │   └── v1v2_eda_and_data_cleaning.ipynb
+│   ├── dune_web_downloads/                     # Web-based data processing
+│   │   ├── v1_csvs_formatting_and_merging.ipynb
+│   │   ├── v2_csvs_formatting_and_merging.ipynb
+│   │   ├── v1v2_eda_and_data_cleaning.ipynb
+│   │   ├── LBPs_dataset_analysis.ipynb
+│   │   └── rLBPs/                              # Reverse LBP analysis
+│   │       ├── v1v2_download.ipynb
+│   │       └── v1v2_historical_analysis.ipynb
+│   └── media/                                  # Processed CSV outputs
+├── model_development/
+│   └── logistic_regression_&_random_forest.ipynb  # ML classification models
+```
+
+---
+
+## Notes
+
+- All datasets are deduplicated at the pool level (by `pool_address`)
+- Duration filtering applies a 6-hour minimum threshold
+- Token decimals are normalized based on token type and blockchain
+- Price calculations use the Dune `dex.trades` table as source of truth
